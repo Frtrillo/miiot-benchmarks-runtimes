@@ -1,5 +1,5 @@
 
-# Benchmark de Rendimiento: .NET vs. Node.js vs. Bun
+# Benchmark de Rendimiento: .NET vs. Node.js vs. Bun BY TRILLO 🔥
 
 Este documento presenta los resultados de un benchmark diseñado para medir el rendimiento de **.NET (C#), Node.js y Bun** en una tarea de procesamiento de datos intensiva y puramente computacional (CPU-bound).
 
