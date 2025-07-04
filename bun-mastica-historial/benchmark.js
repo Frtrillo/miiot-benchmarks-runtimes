@@ -1,30 +1,33 @@
-function generateLogs(n) {
-  const logs = [];
+// Función generadora que "cede" un log a la vez, sin crear un array.
+function* generateLogsStream(n) {
   const start = Date.now() - 7 * 24 * 60 * 60 * 1000; // 7 días atrás
   for (let i = 0; i < n; i++) {
-    logs.push({
-      timestamp: start + i * 60000, // 1 log por minuto
+    // 'yield' entrega el objeto y pausa la función hasta la siguiente iteración del bucle que lo consume.
+    yield {
+      timestamp: start + i * 60000,
       value: Math.random() * 100,
-        userId: Math.floor(Math.random() * 1000), // Simula 1000 usuarios
-        action: Math.random() > 0.5 ? 'click' : 'view', // Simula dos tipos de acciones
-        temperature: Math.random() * 30 + 15, // Temperatura entre 15 y 45 grados
-        temperature2: Math.random() * 30 + 15, // Temperatura entre 15 y 45 grados
-        name: `User${Math.floor(Math.random() * 1000)}`, // Nombre de usuario simulado
-        surname: `Surname${Math.floor(Math.random() * 1000)}`, // Apellido de usuario simulado
-        email: `user${Math.floor(Math.random() * 1000)}@example.com`, // Email simulado
-    });
+      // Los otros campos no son necesarios para el cálculo, así que podemos omitirlos
+      // para que la generación sea aún más rápida en ambos lenguajes.
+      // Si los necesitaras, los añadirías aquí.
+    };
   }
-  return logs;
 }
 
-function benchmark() {
-  const logs = generateLogs(50000000);
+function benchmarkOptimized() {
+  const n = 50000000;
   const interval = 10 * 60 * 1000; // 10 minutos en ms
 
+  console.log("Iniciando benchmark optimizado de Node.js/Bun...");
   const start = performance.now();
 
   const grouped = {};
-  for (const log of logs) {
+  
+  // Creamos el generador. No se ejecuta nada todavía.
+  const logGenerator = generateLogsStream(n);
+
+  // El bucle 'for...of' consumirá el generador, pidiendo un log a la vez.
+  // ¡No se almacena ningún array de 50 millones de logs!
+  for (const log of logGenerator) {
     const bucket = Math.floor(log.timestamp / interval) * interval;
     if (!grouped[bucket]) {
       grouped[bucket] = { sum: 0, count: 0 };
@@ -36,8 +39,8 @@ function benchmark() {
   const averages = Object.values(grouped).map(g => g.sum / g.count);
 
   const end = performance.now();
-  console.log(`Bun JS - Tiempo: ${((end - start) / 1000).toFixed(2)} s`);
+  console.log(`Bun/Node JS (Optimizado) - Tiempo: ${((end - start) / 1000).toFixed(3)} s`);
   console.log(`Buckets calculados: ${averages.length}`);
 }
 
-benchmark();
+benchmarkOptimized();

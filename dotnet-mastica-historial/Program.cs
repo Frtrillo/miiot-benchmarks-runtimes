@@ -7,66 +7,44 @@ class Program
 {
     static void Main()
     {
-        var logs = GenerateLogs(50000000);
+        int n = 50000000;
         var interval = TimeSpan.FromMinutes(10);
-
         var sw = Stopwatch.StartNew();
 
-        var grouped = new Dictionary<long, (double sum, int count)>();
-
-        foreach (var log in logs)
-        {
-            var bucket = (long)(log.Timestamp.Ticks / interval.Ticks) * interval.Ticks;
-            if (!grouped.ContainsKey(bucket))
-            {
-                grouped[bucket] = (0, 0);
-            }
-            var current = grouped[bucket];
-            grouped[bucket] = (current.sum + log.Value, current.count + 1);
-        }
-
-        var averages = grouped.Values.Select(g => g.sum / g.count).ToList();
+        // Procesa los datos "al vuelo" sin almacenarlos en una lista
+        var averages = ProcessLogsOnTheFly(n, interval);
 
         sw.Stop();
-        Console.WriteLine($"C# .NET - Tiempo: {sw.Elapsed.TotalSeconds:F3} s");
+        Console.WriteLine($"C# .NET (Optimizado) - Tiempo: {sw.Elapsed.TotalSeconds:F3} s");
         Console.WriteLine($"Buckets calculados: {averages.Count}");
     }
 
-    static List<Log> GenerateLogs(int n)
+    static List<double> ProcessLogsOnTheFly(int n, TimeSpan interval)
     {
-        var logs = new List<Log>(n);
+        var grouped = new Dictionary<long, (double sum, int count)>();
         var start = DateTime.Now.AddDays(-7);
         var rnd = new Random();
 
+        // No creamos una lista gigante. Generamos y procesamos en el mismo bucle.
         for (int i = 0; i < n; i++)
         {
-            logs.Add(new Log
+            // Genera solo los datos que necesitas para esta iteración
+            var timestamp = start.AddMinutes(i);
+            var value = rnd.NextDouble() * 100;
+
+            // El resto de la lógica de procesamiento es idéntica
+            var bucket = (long)(timestamp.Ticks / interval.Ticks) * interval.Ticks;
+            
+            // Usamos TryGetValue para ser un poco más eficientes que ContainsKey + indexer
+            if (!grouped.TryGetValue(bucket, out var current))
             {
-                Timestamp = start.AddMinutes(i),
-                Value = rnd.NextDouble() * 100,
-                UserId = rnd.Next(0, 1000),
-                Action = rnd.NextDouble() > 0.5 ? "click" : "view",
-                Temperature = rnd.NextDouble() * 30 + 15,
-                Temperature2 = rnd.NextDouble() * 30 + 15,
-                Name = $"User{rnd.Next(0,1000)}",
-                Surname = $"Surname{rnd.Next(0,1000)}",
-                Email = $"user{rnd.Next(0,1000)}@example.com"
-            });
+                current = (0, 0);
+            }
+            
+            grouped[bucket] = (current.sum + value, current.count + 1);
         }
 
-        return logs;
+        // El cálculo final es el mismo
+        return grouped.Values.Select(g => g.sum / g.count).ToList();
     }
-}
-
-class Log
-{
-    public DateTime Timestamp { get; set; }
-    public double Value { get; set; }
-    public int UserId { get; set; }
-    public string Action { get; set; } = "";
-    public double Temperature { get; set; }
-    public double Temperature2 { get; set; }
-    public string Name { get; set; } = "";
-    public string Surname { get; set; } = "";
-    public string Email { get; set; } = "";
 }
