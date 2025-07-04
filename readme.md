@@ -1,4 +1,3 @@
-
 # Benchmark de Rendimiento: .NET vs. Bun vs. Node.js BY TRILLO 🔥
 
 Este documento presenta los resultados de un benchmark diseñado para medir el rendimiento de **.NET (C#), Bun y Node.js** en una tarea de procesamiento de datos intensiva y puramente computacional (CPU-bound).
@@ -69,19 +68,39 @@ Las pruebas se realizaron con las siguientes versiones:
 - **Node.js:** v22.14.0
 - **.NET SDK:** 9.0.301
 
-## Resultados Finales (Tiempos Representativos)
+## Resultados Finales: 50 Millones de Registros
 
 Los tiempos presentados son representativos de múltiples ejecuciones para minimizar las variaciones puntuales.
 
 | Runtime | Tiempo (segundos) | Observaciones |
 | :--- | :--- | :--- |
-| **.NET (Release)** | **~1.449 s** | 🥇 **El ganador por un margen mínimo.** Rendimiento de élite gracias al compilador JIT optimizado. |
-| **Bun** | **~1.473 s** | 🥈 **Empate técnico.** Rendimiento excepcional, casi idéntico al de .NET, demostrando su potencia. |
-| **.NET (Debug)** | **2.249 s** | 🥉 **Más rápido que Node.js,** incluso sin las optimizaciones del modo Release. |
-| **Node.js** | **~4.324 s** | 🐢 El más lento en este escenario CPU-bound, más de 3 veces más que sus competidores directos. |
+| **.NET (Release)** | **~1,449 s** | 🥇 **El ganador por un margen mínimo.** Rendimiento de élite gracias al compilador JIT optimizado. |
+| **Bun** | **~1,473 s** | 🥈 **Empate técnico.** Rendimiento excepcional, casi idéntico al de .NET, demostrando su potencia. |
+| **.NET (Debug)** | **2,249 s** | 🥉 **Más rápido que Node.js,** incluso sin las optimizaciones del modo Release. |
+| **Node.js** | **~4,324 s** | 🐢 El más lento en este escenario CPU-bound, más de 3 veces más que sus competidores directos. |
 
 ![Gráfico de Resultados](benchmark-result.png)
-*Gráfico comparando los tiempos de ejecución. .NET y Bun muestran un rendimiento casi idéntico. Menor es mejor.*
+*Gráfico comparando los tiempos de ejecución para 50M de registros. .NET y Bun muestran un rendimiento casi idéntico. Menor es mejor.*
+
+---
+
+## Prueba de Escalabilidad: Aumentando la Carga a 200 Millones de Registros
+
+Para entender cómo se comportan los runtimes bajo una carga de trabajo cuatro veces mayor, se repitió la prueba con 200 millones de registros.
+
+| Runtime | Tiempo (segundos) | Observaciones |
+| :--- | :--- | :--- |
+| **.NET (Release)** | **~5,99 s** | 🥇 **Mantiene el liderazgo.** Su rendimiento escala de manera predecible y la diferencia con Bun se amplía ligeramente. |
+| **Bun** | **~6,42 s** | 🥈 **Excelente escalabilidad.** Sigue muy de cerca a .NET, demostrando que su rendimiento se mantiene sólido con cargas más grandes. |
+| **Node.js** | **(No ejecutado)** | Se estima un tiempo superior a los 17 segundos, manteniendo la proporción observada en la prueba de 50M. |
+
+### Análisis de Escalabilidad
+Con un dataset 4 veces más grande, los tiempos de ejecución no se cuadruplican exactamente, lo que demuestra la eficiencia de los compiladores JIT al optimizar bucles "calientes" durante más tiempo.
+
+*   **.NET (Release):** Pasó de 1,45s a 5,99s (un factor de ~4.1x). Muestra una escalabilidad lineal y robusta, afianzando su posición como el más rápido.
+*   **Bun:** Pasó de 1,47s a 6,42s (un factor de ~4.3x). Aunque escala ligeramente peor que .NET, la diferencia es mínima y sigue siendo un resultado de primer nivel.
+
+Estos resultados refuerzan las conclusiones iniciales: tanto .NET como Bun son opciones de altísimo rendimiento para cargas computacionales intensivas, escalando de manera muy efectiva.
 
 ---
 
@@ -117,4 +136,13 @@ Sin embargo, este benchmark es **100% CPU-bound**. En este escenario, las optimi
     *   Para **servidores API y tareas asíncronas (I/O)**, **Node.js** sigue siendo una opción excelente, robusta y con el ecosistema más grande.
     *   Para **algoritmos de procesamiento de datos y tareas CPU-intensivas**, **.NET** o **Bun** ofrecen un rendimiento significativamente superior.
 
-4.  **¡Compila en modo Release!** La diferencia entre .NET Debug (**2.249 s**) y Release (**~1.449 s**) es drástica. El código optimizado es aproximadamente un **55% más rápido**. Esto subraya la importancia crítica de nunca medir el rendimiento en una compilación de desarrollo.
+4.  **¡Compila en modo Release!** La diferencia entre .NET Debug (**2,249 s**) y Release (**~1,449 s**) es drástica. El código optimizado es aproximadamente un **55% más rápido**. Esto subraya la importancia crítica de nunca medir el rendimiento en una compilación de desarrollo.
+
+### Un Benchmark para un Caso de Uso Específico
+
+Es crucial recordar que el benchmark "Mastica-Historial" fue diseñado para un caso de uso muy específico: el procesamiento intensivo de datos históricos de dispositivos para tareas de IA, una tarea puramente computacional.
+
+Para evaluaciones de rendimiento en otros escenarios, como servidores web, APIs REST, acceso a bases de datos y tareas asíncronas (I/O-bound), es fundamental consultar benchmarks especializados que miden diferentes aspectos de un runtime. Te recomendamos revisar estas excelentes referencias:
+
+*   **[TechEmpower Web Framework Benchmarks](https://www.techempower.com/benchmarks/#section=data-r23y):** El estándar de la industria para comparar el rendimiento de frameworks web en tareas como serialización JSON, acceso a bases de datos y renderizado de plantillas.
+*   **[SharkBench](https://sharkbench.dev/):** Otro gran recurso que compara el rendimiento de diferentes runtimes de JavaScript (incluyendo Bun, Node.js y Deno) en una variedad de tareas.

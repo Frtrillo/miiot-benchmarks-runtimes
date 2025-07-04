@@ -7,7 +7,7 @@ class Program
 {
     static void Main()
     {
-        int n = 50000000;
+        int n = 200000000;
         var interval = TimeSpan.FromMinutes(10);
         var sw = Stopwatch.StartNew();
 
