@@ -61,6 +61,14 @@ node ./bun-mastica-historial/aot-processing.js
 
 ---
 
+## Versiones de los Runtimes
+
+Las pruebas se realizaron con las siguientes versiones:
+
+- **Bun:** 1.2.15
+- **Node.js:** v22.14.0
+- **.NET SDK:** 9.0.301
+
 ## Resultados Finales (Tiempos Representativos)
 
 Los tiempos presentados son representativos de múltiples ejecuciones para minimizar las variaciones puntuales.
