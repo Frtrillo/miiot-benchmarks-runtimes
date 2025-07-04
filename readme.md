@@ -1,12 +1,12 @@
-# Benchmark de Rendimiento: .NET vs. Bun vs. Node.js BY TRILLO 🔥
+# Benchmark de Rendimiento: .NET vs. Bun vs. Node.js by Francisco Trillo 🔥
 
-Este documento presenta los resultados de un benchmark diseñado para medir el rendimiento de **.NET (C#), Bun y Node.js** en una tarea de procesamiento de datos intensiva y puramente computacional (CPU-bound).
+En este documento presento los resultados de un benchmark que diseñé para medir el rendimiento de **.NET (C#), Bun y Node.js** en una tarea de procesamiento de datos intensiva y puramente computacional (CPU-bound).
 
 ## El Desafío: "Mastica-Historial"
 
-El algoritmo probado simula una tarea común de procesamiento de logs o series temporales:
-1.  Genera 50 millones de registros de datos, cada uno con una marca de tiempo y un valor numérico.
-2.  Agrupa estos registros en "buckets" de 10 minutos.
+El algoritmo que probé simula una tarea común de procesamiento de logs o series temporales:
+1.  Genera una cantidad masiva de registros de datos (50, 150 y 200 millones), cada uno con una marca de tiempo y un valor numérico.
+2.  Agrupa estos registros en "buckets" de 10 minutos. En mi prueba, esto genera 1 bucket por cada 10 registros, es decir, 5M, 15M y 20M de buckets respectivamente.
 3.  Calcula la suma y el conteo de valores para cada bucket.
 4.  Finalmente, calcula el promedio de cada bucket.
 
@@ -14,11 +14,11 @@ Esta prueba está diseñada para estresar el **rendimiento del bucle principal, 
 
 ## Metodología y Garantía de Justicia
 
-Para asegurar una comparación justa y precisa, se siguieron los siguientes principios:
+Para asegurar una comparación justa y precisa, seguí los siguientes principios:
 
-*   **Algoritmo Idéntico:** La lógica de programación es una réplica fiel en C# y JavaScript, utilizando las estructuras de datos y operaciones equivalentes en cada ecosistema.
-*   **Ejecución en un Solo Hilo:** Todas las pruebas se ejecutaron utilizando **un único hilo de procesamiento (single-thread)**. Esto garantiza una comparación **justa y equitativa** del rendimiento por núcleo de cada runtime.
-*   **Compilación Optimizada:** La prueba principal de .NET se ejecutó en modo **Release**, que aplica las máximas optimizaciones. El modo Debug se incluye como referencia.
+*   **Algoritmo Idéntico:** La lógica de programación es una réplica fiel en C# y JavaScript.
+*   **Ejecución en un Solo Hilo:** Todas las pruebas se ejecutaron utilizando **un único hilo de procesamiento (single-thread)** para una comparación equitativa del rendimiento por núcleo.
+*   **Compilación Optimizada:** La prueba principal de .NET se ejecutó en modo **Release**.
 
 ### Entorno de Pruebas
 Todas las mediciones se realizaron en el siguiente hardware para garantizar la consistencia:
@@ -27,33 +27,17 @@ Todas las mediciones se realizaron en el siguiente hardware para garantizar la c
 *   **Sistema Operativo:** Windows
 
 ## Cómo Ejecutar el Benchmark
-
 Para replicar estos resultados, puedes usar los siguientes comandos desde la raíz del proyecto. Asegúrate de tener instalados .NET, Node.js y Bun.
 
 ### .NET (Modo Release - Optimizado)
-Este comando compila y ejecuta el proyecto en su configuración más rápida.
-
 ```powershell
 dotnet run -c Release --project ./dotnet-mastica-historial/dotnet-mastica-historial.csproj
 ```
-
-### .NET (Modo Debug - Referencia)
-Este comando ejecuta el proyecto sin optimizaciones, útil para ver el impacto de la compilación.
-
-```powershell
-dotnet run --project ./dotnet-mastica-historial/dotnet-mastica-historial.csproj
-```
-
 ### Bun
-Bun ejecuta directamente el archivo JavaScript con su runtime de alto rendimiento.
-
 ```powershell
 bun run ./bun-mastica-historial/aot-processing.js
 ```
-
 ### Node.js
-Se usa el ejecutable estándar de Node.js para correr el mismo script.
-
 ```powershell
 node ./bun-mastica-historial/aot-processing.js
 ```
@@ -68,81 +52,60 @@ Las pruebas se realizaron con las siguientes versiones:
 - **Node.js:** v22.14.0
 - **.NET SDK:** 9.0.301
 
-## Resultados Finales: 50 Millones de Registros
-
-Los tiempos presentados son representativos de múltiples ejecuciones para minimizar las variaciones puntuales.
+## Resultados con 50 Millones de Registros (5M Buckets)
 
 | Runtime | Tiempo (segundos) | Observaciones |
 | :--- | :--- | :--- |
-| **.NET (Release)** | **~1,449 s** | 🥇 **El ganador por un margen mínimo.** Rendimiento de élite gracias al compilador JIT optimizado. |
-| **Bun** | **~1,473 s** | 🥈 **Empate técnico.** Rendimiento excepcional, casi idéntico al de .NET, demostrando su potencia. |
-| **.NET (Debug)** | **2,249 s** | 🥉 **Más rápido que Node.js,** incluso sin las optimizaciones del modo Release. |
-| **Node.js** | **~4,324 s** | 🐢 El más lento en este escenario CPU-bound, más de 3 veces más que sus competidores directos. |
+| **.NET (Release)** | **~1,449 s** | 🥇 El ganador por un margen mínimo. |
+| **Bun** | **~1,473 s** | 🥈 Empate técnico con .NET. |
+| **Node.js** | **~4,324 s** | 🐢 Más de 3 veces más lento. |
+
+---
+
+## Pruebas de Escalabilidad: 150 y 200 Millones de Registros
+
+Para entender cómo se comportan los runtimes bajo una carga de trabajo mayor, llevé la prueba a 150 millones de registros (15M de buckets) y 200 millones de registros (20M de buckets). Los resultados son reveladores.
+
+| Runtime | Tiempo (150M de registros) | Tiempo (200M de registros) |
+| :--- | :--- | :--- |
+| **.NET (Release)** | **~4,56 s** | **~5,99 s** |
+| **Bun** | **~5,06 s** | **~6,42 s** |
+| **Node.js** | **~12,23 s** | **Falla con `RangeError`** 💥 |
 
 ![Gráfico de Resultados](benchmark-result.png)
 *Gráfico comparando los tiempos de ejecución para 50M de registros. .NET y Bun muestran un rendimiento casi idéntico. Menor es mejor.*
 
----
+### Análisis de Escalabilidad y la Falla de Node.js
+El resultado más importante de este benchmark se observa al escalar.
 
-## Prueba de Escalabilidad: Aumentando la Carga a 200 Millones de Registros
+*   **Rendimiento Lineal de .NET y Bun:** Tanto .NET como Bun escalan de manera predecible y robusta. Mantienen su rendimiento de élite incluso con cargas de trabajo masivas, demostrando la eficiencia de sus motores y la solidez de sus estructuras de datos.
 
-Para entender cómo se comportan los runtimes bajo una carga de trabajo cuatro veces mayor, se repitió la prueba con 200 millones de registros.
+*   **El Límite del `Map` de V8:** El resultado de Node.js es crucial.
+    *   Con **150 millones de registros (15M de buckets)**, Node.js completa la tarea, aunque siendo 2.5 veces más lento que sus competidores.
+    *   Sin embargo, al pasar a **200 millones de registros (20M de buckets)**, el programa falla abruptamente con `RangeError: Map maximum size exceeded`.
+    *   **La causa es una limitación arquitectónica del motor V8**: su objeto `Map` tiene un límite estricto de **16,777,216** (2^24) entradas. Mi prueba de 200M de registros, al generar 20M de buckets, supera directamente este umbral.
 
-| Runtime | Tiempo (segundos) | Observaciones |
-| :--- | :--- | :--- |
-| **.NET (Release)** | **~5,99 s** | 🥇 **Mantiene el liderazgo.** Su rendimiento escala de manera predecible y la diferencia con Bun se amplía ligeramente. |
-| **Bun** | **~6,42 s** | 🥈 **Excelente escalabilidad.** Sigue muy de cerca a .NET, demostrando que su rendimiento se mantiene sólido con cargas más grandes. |
-| **Node.js** | **(No ejecutado)** | Se estima un tiempo superior a los 17 segundos, manteniendo la proporción observada en la prueba de 50M. |
-
-### Análisis de Escalabilidad
-Con un dataset 4 veces más grande, los tiempos de ejecución no se cuadruplican exactamente, lo que demuestra la eficiencia de los compiladores JIT al optimizar bucles "calientes" durante más tiempo.
-
-*   **.NET (Release):** Pasó de 1,45s a 5,99s (un factor de ~4.1x). Muestra una escalabilidad lineal y robusta, afianzando su posición como el más rápido.
-*   **Bun:** Pasó de 1,47s a 6,42s (un factor de ~4.3x). Aunque escala ligeramente peor que .NET, la diferencia es mínima y sigue siendo un resultado de primer nivel.
-
-Estos resultados refuerzan las conclusiones iniciales: tanto .NET como Bun son opciones de altísimo rendimiento para cargas computacionales intensivas, escalando de manera muy efectiva.
+En contraste, ni el `Dictionary<TKey, TValue>` de .NET ni el `Map` de Bun (respaldado por JavaScriptCore y Zig) tienen esta limitación artificial. Su capacidad está limitada únicamente por la memoria RAM disponible en el sistema.
 
 ---
 
-## Análisis Detallado de los Resultados
+## Conclusiones de mi Benchmark
 
-### .NET: Potencia y Consistencia en Modo Release
+1.  **.NET y Bun son competidores de élite en rendimiento y escala:** Para el tipo de cómputo intensivo que probé, tanto .NET como Bun ofrecen un rendimiento de vanguardia. Son capaces de manejar datasets con una cardinalidad de claves extremadamente alta sin problemas.
 
-.NET se posiciona como el líder en este benchmark, confirmando su estatus como una plataforma de altísimo rendimiento.
+2.  **.NET es un pilar de rendimiento y robustez:** En mis pruebas, .NET se corona como el más rápido y el más robusto. Su combinación de un compilador de clase mundial (RyuJIT) y estructuras de datos sin límites artificiales lo convierte en mi opción preferida para el procesamiento de datos a gran escala.
 
-*   **Compilador RyuJIT:** En modo `Release`, el compilador de .NET realiza optimizaciones agresivas y muy avanzadas, llevando el código C# a un rendimiento de metal nativo. Superar a Node.js incluso en modo Debug es un testimonio de la eficiencia base del runtime.
-*   **Potencial de Escalabilidad:** .NET tiene una ventaja no explotada aquí: el paralelismo. Con un simple cambio a `Parallel.For`, podría haber distribuido la carga entre todos los cores del Ryzen 7, reduciendo drásticamente el tiempo de ejecución.
+3.  **Elige la herramienta adecuada para el trabajo y sus limitaciones:**
+    *   Para **servidores API y tareas asíncronas (I/O)**, **Node.js** sigue siendo una opción excelente y la más popular.
+    *   Para **algoritmos de procesamiento de datos y tareas CPU-intensivas**, mis resultados muestran que **.NET** o **Bun** ofrecen un rendimiento y una robustez muy superiores.
+    *   **¡Cuidado con la cardinalidad en Node.js!** Si tu caso de uso puede generar más de 16.7 millones de claves únicas en un mapa o diccionario, **Node.js no es una opción viable** debido a la limitación de su motor V8.
 
-### ¿Por qué Bun está a la par con .NET?
-
-El rendimiento de Bun es extraordinario y lo coloca en la misma liga que .NET para este tipo de tareas.
-
-1.  **Motor JavaScriptCore (JSC):** A diferencia de Node.js (V8), Bun utiliza el motor de Safari. Para este tipo de bucle numérico "caliente", el compilador JIT de JSC demuestra ser extremadamente eficiente.
-2.  **Implementación Nativa en Zig:** Gran parte de las APIs de Bun, incluyendo `Map`, están reescritas en Zig, un lenguaje de bajo nivel. Esto reduce la sobrecarga y optimiza al máximo operaciones críticas que en otros runtimes ocurren a un nivel más alto.
-
-### ¿Por qué Node.js se queda atrás en *esta* prueba?
-
-Este resultado no significa que Node.js sea lento. Node.js es una plataforma increíblemente rápida para su principal caso de uso: **aplicaciones I/O-bound** (servidores web, APIs, microservicios).
-
-Sin embargo, este benchmark es **100% CPU-bound**. En este escenario, las optimizaciones del motor V8, aunque excelentes para código JavaScript dinámico y de corta duración, no resultan tan eficaces para bucles numéricos intensivos y sostenidos como las de Bun o .NET.
-
-## Conclusiones
-
-1.  **.NET y Bun son competidores de élite:** Para tareas de cómputo intensivo, tanto .NET como Bun ofrecen un rendimiento de vanguardia que los coloca en un empate técnico, desafiando las percepciones tradicionales de rendimiento entre código compilado y JavaScript.
-
-2.  **.NET es un pilar de rendimiento y madurez:** Sigue siendo una de las mejores opciones para backends que requieren alto rendimiento, con un ecosistema maduro y capacidades de paralelización listas para usar que le darían una ventaja aún mayor en hardware multi-core.
-
-3.  **Elige la herramienta adecuada para el trabajo:**
-    *   Para **servidores API y tareas asíncronas (I/O)**, **Node.js** sigue siendo una opción excelente, robusta y con el ecosistema más grande.
-    *   Para **algoritmos de procesamiento de datos y tareas CPU-intensivas**, **.NET** o **Bun** ofrecen un rendimiento significativamente superior.
-
-4.  **¡Compila en modo Release!** La diferencia entre .NET Debug (**2,249 s**) y Release (**~1,449 s**) es drástica. El código optimizado es aproximadamente un **55% más rápido**. Esto subraya la importancia crítica de nunca medir el rendimiento en una compilación de desarrollo.
+4.  **¡Compila en modo Release!** La diferencia entre .NET Debug y Release es enorme. En mi prueba de 50M, el código optimizado fue un **55% más rápido**. Nunca se debe medir el rendimiento en una compilación de desarrollo.
 
 ### Un Benchmark para un Caso de Uso Específico
+Es crucial recordar que diseñé "Mastica-Historial" para mi caso de uso específico: el procesamiento intensivo de datos históricos de dispositivos para tareas de IA.
 
-Es crucial recordar que el benchmark "Mastica-Historial" fue diseñado para un caso de uso muy específico: el procesamiento intensivo de datos históricos de dispositivos para tareas de IA, una tarea puramente computacional.
+Para evaluaciones de rendimiento en otros escenarios, como servidores web o acceso a bases de datos, recomiendo consultar benchmarks especializados.
 
-Para evaluaciones de rendimiento en otros escenarios, como servidores web, APIs REST, acceso a bases de datos y tareas asíncronas (I/O-bound), es fundamental consultar benchmarks especializados que miden diferentes aspectos de un runtime. Te recomendamos revisar estas excelentes referencias:
-
-*   **[TechEmpower Web Framework Benchmarks](https://www.techempower.com/benchmarks/#section=data-r23y):** El estándar de la industria para comparar el rendimiento de frameworks web en tareas como serialización JSON, acceso a bases de datos y renderizado de plantillas.
-*   **[SharkBench](https://sharkbench.dev/):** Otro gran recurso que compara el rendimiento de diferentes runtimes de JavaScript (incluyendo Bun, Node.js y Deno) en una variedad de tareas.
+*   **[TechEmpower Web Framework Benchmarks](https://www.techempower.com/benchmarks/#section=data-r23y):** El estándar de la industria para comparar frameworks web.
+*   **[SharkBench](https://sharkbench.dev/):** Otro gran recurso que compara el rendimiento de diferentes runtimes de JavaScript.

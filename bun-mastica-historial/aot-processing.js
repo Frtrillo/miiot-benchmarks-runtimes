@@ -48,7 +48,7 @@ function processLogsOnTheFly(n, intervalMilliseconds) {
 }
 
 function main() {
-    const n = 200000000;
+    const n = 150000000;
     const intervalMinutes = 10;
     const intervalMilliseconds = intervalMinutes * 60 * 1000;
 
