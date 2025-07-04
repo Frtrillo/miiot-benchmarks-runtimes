@@ -7,7 +7,7 @@ class Program
 {
     static void Main()
     {
-        var logs = GenerateLogs(5000000);
+        var logs = GenerateLogs(50000000);
         var interval = TimeSpan.FromMinutes(10);
 
         var sw = Stopwatch.StartNew();
@@ -28,7 +28,7 @@ class Program
         var averages = grouped.Values.Select(g => g.sum / g.count).ToList();
 
         sw.Stop();
-        Console.WriteLine($"C# .NET - Tiempo: {sw.ElapsedMilliseconds} ms");
+        Console.WriteLine($"C# .NET - Tiempo: {sw.Elapsed.TotalSeconds:F3} s");
         Console.WriteLine($"Buckets calculados: {averages.Count}");
     }
 

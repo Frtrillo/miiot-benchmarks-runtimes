@@ -18,7 +18,7 @@ function generateLogs(n) {
 }
 
 function benchmark() {
-  const logs = generateLogs(5000000);
+  const logs = generateLogs(50000000);
   const interval = 10 * 60 * 1000; // 10 minutos en ms
 
   const start = performance.now();
@@ -36,7 +36,7 @@ function benchmark() {
   const averages = Object.values(grouped).map(g => g.sum / g.count);
 
   const end = performance.now();
-  console.log(`Bun JS - Tiempo: ${(end - start).toFixed(2)} ms`);
+  console.log(`Bun JS - Tiempo: ${((end - start) / 1000).toFixed(2)} s`);
   console.log(`Buckets calculados: ${averages.length}`);
 }
 
