@@ -37,3 +37,6 @@ Bun/Node JS (Optimizado) - Tiempo: 19.884 s
 Buckets calculados: 5000001
 
 ![Resultados del benchmark](benchmark-result.png)
+
+
+(1 core bun vs 8 core .net)
