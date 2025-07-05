@@ -75,6 +75,8 @@ Para llevar los runtimes al límite, se triplicó la carga. Los resultados no so
 | **.NET (Release)** | **~43.4 s** | 🥈 **Rendimiento sólido y predecible**. Sigue siendo extremadamente competitivo y demuestra una escalabilidad robusta. Un pilar de fiabilidad. |
 | **Node.js** | **~64.6 s** | 🐢 **La brecha se amplía**. A esta escala, Node.js es ahora **2 veces más lento que Bun** y un 50% más lento que .NET. La sobrecarga en la gestión de objetos se hace mucho más pronunciada. |
 
+![Resultados del Benchmark](benchmark-result.png)
+
 ### Análisis del Consumo de Memoria (Test de 50M)
 
 La velocidad no es el único factor. El consumo de memoria revela una historia diferente y muy importante.
