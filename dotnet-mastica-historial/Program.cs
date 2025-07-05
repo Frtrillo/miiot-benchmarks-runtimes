@@ -103,7 +103,7 @@ class Program
 {
     static void Main()
     {
-        int n = 15000000;
+        int n = 50000000;
         var interval = TimeSpan.FromMinutes(10);
 
         Console.WriteLine($"Procesando {n:N0} registros con ESQUEMA COMPLETO...");

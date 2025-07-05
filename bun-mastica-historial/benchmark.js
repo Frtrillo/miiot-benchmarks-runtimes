@@ -145,7 +145,7 @@ function processComplexLogsOnTheFly(n, intervalMilliseconds) {
 }
 
 function main() {
-    const n = 15000000;
+    const n = 50000000;
     const intervalMinutes = 10;
     const intervalMilliseconds = intervalMinutes * 60 * 1000;
 
