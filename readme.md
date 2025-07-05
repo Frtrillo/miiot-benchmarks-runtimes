@@ -27,7 +27,7 @@ Para asegurar una comparación justa y precisa, he seguido principios estrictos:
 ### Entorno de Pruebas
 *   **CPU:** AMD Ryzen 7 5800X (8 núcleos, 16 hilos)
 *   **RAM:** 16 GB DDR4 3600 MHz
-*   **Sistema Operativo:** Windows
+*   **Sistema Operativo:** Windows 11
 
 ## Cómo Ejecutar el Benchmark
 ```powershell
@@ -85,7 +85,7 @@ La velocidad no es el único factor. El consumo de memoria revela una historia d
 | :--- | :--- | :--- |
 | **.NET (Release)** | **~560 MB** | 🏆 **El campeón de la eficiencia**. Un consumo de memoria extraordinariamente bajo. La gestión de memoria de .NET y su recolector de basura son de primera clase. |
 | **Node.js** | **~1.2 GB** | **Consumo moderado**. Utiliza más del doble de RAM que .NET, un coste esperado por la naturaleza dinámica de los objetos en V8. |
-| **Bun** | **~2.0 GB** | **El más intensivo en RAM**. Aunque es el más rápido en CPU, es el que más memoria consume. Esto podría deberse a una gestión de memoria menos madura o a posibles optimizaciones pendientes, dado que es un runtime más joven. |
+| **Bun** | **~2.0 GB** | **El más intensivo en RAM**. Aunque es el más rápido en CPU, es el que más memoria consume. Esto podría deberse a una gestión de memoria menos madura o a un memory leak, ya que aún es un runtime joven y no es la primera vez que me he encontrado con un leak corriendo otros proyectos de nodejs con bun. |
 
 ---
 
