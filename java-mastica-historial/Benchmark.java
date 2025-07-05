@@ -15,7 +15,6 @@ public class Benchmark {
     /**
      * Represents the complete data structure of a log record,
      * matching the entire schema of the database table.
-     * (Original comment translated from Spanish)
      */
     static class HistoryLogFull {
         private String vinculationCode = "VINC-CODE-BENCHMARK";
@@ -95,7 +94,6 @@ public class Benchmark {
 
     /**
      * Mutable class for efficiently aggregating values.
-     * (Original comment translated from Spanish)
      */
     static class BucketAggregate {
         public double sumTemperature = 0;
