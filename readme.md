@@ -35,11 +35,11 @@ dotnet run -c Release --project ./dotnet-mastica-historial/dotnet-mastica-histor
 ```
 ### Bun
 ```powershell
-bun run ./bun-mastica-historial/aot-processing.js
+bun run ./bun-mastica-historial/benchmark.js
 ```
 ### Node.js
 ```powershell
-node ./bun-mastica-historial/aot-processing.js
+node ./bun-mastica-historial/benchmark.js
 ```
 
 ---

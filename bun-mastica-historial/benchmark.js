@@ -1,46 +1,64 @@
-// Función generadora que "cede" un log a la vez, sin crear un array.
-function* generateLogsStream(n) {
-  const start = Date.now() - 7 * 24 * 60 * 60 * 1000; // 7 días atrás
-  for (let i = 0; i < n; i++) {
-    // 'yield' entrega el objeto y pausa la función hasta la siguiente iteración del bucle que lo consume.
-    yield {
-      timestamp: start + i * 60000,
-      value: Math.random() * 100,
-      // Los otros campos no son necesarios para el cálculo, así que podemos omitirlos
-      // para que la generación sea aún más rápida en ambos lenguajes.
-      // Si los necesitaras, los añadirías aquí.
-    };
-  }
-}
+// Importamos performance de perf_hooks para la medición más precisa
+const { performance } = require('perf_hooks');
 
-function benchmarkOptimized() {
-  const n = 50000000;
-  const interval = 10 * 60 * 1000; // 10 minutos en ms
+function processLogsOnTheFly(n, intervalMilliseconds) {
+    // Map es el equivalente de alto rendimiento a Dictionary<,> en C#
+    const grouped = new Map();
 
-  console.log("Iniciando benchmark optimizado de Node.js/Bun...");
-  const start = performance.now();
+    // Establecemos una fecha de inicio, igual que en el ejemplo de C#
+    const start = new Date();
+    start.setDate(start.getDate() - 7);
+    const startTime = start.getTime(); // Obtenemos el tiempo en ms para cálculos más rápidos
 
-  const grouped = {};
-  
-  // Creamos el generador. No se ejecuta nada todavía.
-  const logGenerator = generateLogsStream(n);
+    // El bucle principal que genera y procesa los datos "al vuelo"
+    for (let i = 0; i < n; i++) {
+        // 1. Genera los datos para esta iteración
+        // Sumamos i minutos (en milisegundos) a la fecha de inicio
+        const timestamp_ms = startTime + (i * 60 * 1000);
+        const value = Math.random() * 100;
 
-  // El bucle 'for...of' consumirá el generador, pidiendo un log a la vez.
-  // ¡No se almacena ningún array de 50 millones de logs!
-  for (const log of logGenerator) {
-    const bucket = Math.floor(log.timestamp / interval) * interval;
-    if (!grouped[bucket]) {
-      grouped[bucket] = { sum: 0, count: 0 };
+        // 2. Lógica de procesamiento idéntica a la de C#
+        // Se calcula el "bucket" truncando la división del tiempo por el intervalo.
+        // Math.floor es el equivalente al casting a (long) para la división entera.
+        const bucket = Math.floor(timestamp_ms / intervalMilliseconds) * intervalMilliseconds;
+
+        // 3. Agrupación eficiente
+        // Usamos Map.get() que es muy rápido.
+        const current = grouped.get(bucket);
+
+        if (!current) {
+            // Si el bucket no existe, lo creamos
+            grouped.set(bucket, { sum: value, count: 1 });
+        } else {
+            // Si ya existe, actualizamos los valores
+            current.sum += value;
+            current.count += 1;
+            // No es necesario volver a hacer grouped.set() porque el objeto se modifica por referencia,
+            // pero lo dejamos para claridad si se usaran tipos primitivos.
+            // grouped.set(bucket, current); 
+        }
     }
-    grouped[bucket].sum += log.value;
-    grouped[bucket].count++;
-  }
 
-  const averages = Object.values(grouped).map(g => g.sum / g.count);
-
-  const end = performance.now();
-  console.log(`Bun/Node JS (Optimizado) - Tiempo: ${((end - start) / 1000).toFixed(3)} s`);
-  console.log(`Buckets calculados: ${averages.length}`);
+    // 4. Cálculo final de los promedios
+    // Array.from(grouped.values()) convierte el iterador de valores del Map en un array.
+    // Luego usamos .map() para calcular el promedio de cada grupo.
+    return Array.from(grouped.values()).map(g => g.sum / g.count);
 }
 
-benchmarkOptimized();
+function main() {
+    const n = 150000000;
+    const intervalMinutes = 10;
+    const intervalMilliseconds = intervalMinutes * 60 * 1000;
+
+    const startTime = performance.now();
+
+    const averages = processLogsOnTheFly(n, intervalMilliseconds);
+
+    const endTime = performance.now();
+    const durationSeconds = (endTime - startTime) / 1000;
+
+    console.log(`Node.js - Tiempo: ${durationSeconds.toFixed(3)} s`);
+    console.log(`Buckets calculados: ${averages.length}`);
+}
+
+main();
