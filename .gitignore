@@ -55,3 +55,51 @@ out/
 *.sublime-workspace
 *.sublime-project
 *.log
+
+
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+*.iml
+*.ipr
+*.iws
+*.log
+*.javadoc/
+target/
+build/
+out/
+.gradle/
+.idea/
+*.classpath
+*.project
+*.settings/
+*.factorypath
+
+# Eclipse
+*.metadata/
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+
+# Maven
+log/
+target/
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# IntelliJ
+*.iml
+.idea/
+out/

@@ -1,7 +1,7 @@
 
-# Benchmark de Rendimiento: .NET vs. Bun vs. Node.js by Francisco Trillo 🔥
+# Benchmark de Rendimiento: .NET vs. Java vs. Bun vs. Node.js by Francisco Trillo 🔥
 
-En este documento presento los resultados de un benchmark riguroso que diseñé para medir el rendimiento de **.NET (C#), Bun y Node.js** en una tarea que simula mi caso de uso real: el procesamiento masivo de **objetos de datos complejos** de forma intensiva y puramente computacional (CPU-bound).
+En este documento presento los resultados de un benchmark riguroso que diseñé para medir el rendimiento de **.NET (C#), Java, Bun y Node.js** en una tarea que simula mi caso de uso real: el procesamiento masivo de **objetos de datos complejos** de forma intensiva y puramente computacional (CPU-bound).
 
 ## El Desafío: "Agregador de Telemetría Masiva (hasta 50 Millones de Registros)"
 
@@ -20,9 +20,9 @@ Esta prueba está diseñada para estresar factores críticos en aplicaciones del
 
 Para asegurar una comparación justa y precisa, he seguido principios estrictos:
 
-*   **Algoritmo y Estructura de Datos Idénticos:** La lógica y la estructura del objeto `HistoryLogFull` son una réplica 1:1 en C# y JavaScript.
+*   **Algoritmo y Estructura de Datos Idénticos:** La lógica y la estructura del objeto `HistoryLogFull` son una réplica 1:1 en C#, Java y JavaScript.
 *   **Ejecución en un Solo Hilo:** Todas las pruebas se ejecutan en un único hilo para una comparación equitativa del rendimiento por núcleo.
-*   **Modos de Ejecución Claros:** Se prueba .NET tanto en modo **Release** (con todas las optimizaciones del compilador) como en modo **Debug** (sin optimizaciones) para ilustrar el impacto de la compilación.
+*   **Modos de Ejecución Claros:** Se prueba .NET tanto en modo **Release** (con todas las optimizaciones del compilador) como en modo **Debug** (sin optimizaciones) para ilustrar el impacto de la compilación. Java se ejecuta directamente sobre su código compilado (`.class`), que por defecto está altamente optimizado por su JIT (HotSpot).
 
 ### Entorno de Pruebas
 *   **CPU:** AMD Ryzen 7 5800X (8 núcleos, 16 hilos)
@@ -36,6 +36,11 @@ dotnet run -c Release --project ./dotnet-mastica-historial/dotnet-mastica-histor
 
 # .NET (Modo Debug - Sin optimizar, para desarrollo)
 dotnet run --project ./dotnet-mastica-historial/dotnet-mastica-historial.csproj
+
+# Java (Compilar primero)
+javac ./java-mastica-historial/Benchmark.java
+# Java (Ejecutar - Requiere heap grande)
+java -Xmx8g -cp ./java-mastica-historial/ Benchmark
 
 # Bun
 bun run ./bun-mastica-historial/benchmark.js
@@ -51,39 +56,29 @@ node ./bun-mastica-historial/benchmark.js
 - **Bun:** 1.2.15+
 - **Node.js:** v22.14.0+
 - **.NET SDK:** 9.0.301+
+- **Java (OpenJDK):** 21+
 
-## Resultados con 15 Millones de Registros Complejos (Carga Estándar)
+## Resultados con 50 Millones de Registros (Test de Estrés)
 
-Los resultados de esta prueba base muestran un claro ganador en rendimiento y ofrecen una lección valiosa sobre la importancia de la compilación optimizada.
-
-| Runtime | Tiempo (segundos) | Observaciones |
-| :--- | :--- | :--- |
-| **Bun** | **~9.8 s** | 🥇 **El claro ganador**. El motor JavaScriptCore de Bun demuestra una eficiencia extraordinaria en la creación y acceso a propiedades de millones de objetos pesados. |
-| **.NET (Release)** | **~13.1 s** | 🥈 **Rendimiento de élite**. La versión optimizada de .NET es extremadamente rápida, demostrando el poder de su compilador JIT (RyuJIT). |
-| **Node.js** | **~18.7 s** | 🐢 **Tercer lugar**. Completa la tarea, pero es casi 2 veces más lento que Bun. La sobrecarga del motor V8 en este tipo de manipulación de objetos dinámicos es evidente. |
-| **.NET (Debug)** | **~18.9 s** | 🐢 **El más lento**. Sin las optimizaciones del JIT, el rendimiento se degrada significativamente, quedando a la par con Node.js. |
-
----
-
-## Ampliando la Carga: Resultados con 50 Millones de Registros (Test de Estrés)
-
-Para llevar los runtimes al límite, se triplicó la carga. Los resultados no solo confirman las tendencias, sino que amplían las diferencias.
+Para llevar los runtimes al límite, se ejecutó la prueba con 50 millones de registros. Los resultados no solo confirman las tendencias, sino que también posicionan a los lenguajes compilados estáticamente de forma muy favorable.
 
 | Runtime | Tiempo (segundos) | Observaciones |
 | :--- | :--- | :--- |
-| **Bun** | **~32.6 s** | 🥇 **Consolida su liderazgo**. Mantiene su posición como el más rápido, demostrando que su rendimiento escala de manera excelente con cargas de trabajo mucho mayores. |
-| **.NET (Release)** | **~43.4 s** | 🥈 **Rendimiento sólido y predecible**. Sigue siendo extremadamente competitivo y demuestra una escalabilidad robusta. Un pilar de fiabilidad. |
-| **Node.js** | **~64.6 s** | 🐢 **La brecha se amplía**. A esta escala, Node.js es ahora **2 veces más lento que Bun** y un 50% más lento que .NET. La sobrecarga en la gestión de objetos se hace mucho más pronunciada. |
+| **Bun** | **~32.6 s** | 🥇 **El rey de la velocidad en JavaScript**. Demuestra una eficiencia extraordinaria en la creación y acceso a propiedades de millones de objetos, consolidando su liderazgo sobre Node.js. |
+| **Java** | **~40.5 s** | 🥈 **Rendimiento de primer nivel**. Ligeramente más rápido que .NET, la JVM HotSpot demuestra su madurez y poder de optimización en tiempo de ejecución para este tipo de cargas de trabajo. |
+| **.NET (Release)** | **~43.4 s** | 🥉 **Rendimiento sólido y predecible**. Extremadamente competitivo y con una escalabilidad robusta. Un pilar de fiabilidad para sistemas de producción. |
+| **Node.js** | **~64.6 s** | **La brecha se amplía**. A esta escala, Node.js es **2 veces más lento que Bun** y significativamente más lento que .NET y Java. La sobrecarga en la gestión de objetos dinámicos de V8 se hace muy pronunciada. |
 
 ![Resultados del Benchmark](benchmark-result.png)
 
 ### Análisis del Consumo de Memoria (Test de 50M)
 
-La velocidad no es el único factor. El consumo de memoria revela una historia diferente y muy importante.
+La velocidad no es el único factor. El consumo de memoria revela una historia diferente y muy importante, destacando la eficiencia de los runtimes con tipado estático.
 
 | Runtime | Consumo de RAM (Aprox.) | Observaciones |
 | :--- | :--- | :--- |
-| **.NET (Release)** | **~560 MB** | 🏆 **El campeón de la eficiencia**. Un consumo de memoria extraordinariamente bajo. La gestión de memoria de .NET y su recolector de basura son de primera clase. |
+| **.NET (Release)** | **~560 MB** | 🏆 **El campeón de la eficiencia**. Un consumo de memoria extraordinariamente bajo. La gestión de memoria de .NET, sus tipos de valor (`structs`) y su recolector de basura son de primera clase. |
+| **Java** | **~1.06 GB** | **Consumo muy eficiente**. Aunque usa más RAM que .NET (debido a que todo es un objeto en el heap), sigue siendo mucho más eficiente que los runtimes de JS. Su recolector de basura (G1 GC) gestiona la carga sin problemas. |
 | **Node.js** | **~1.2 GB** | **Consumo moderado**. Utiliza más del doble de RAM que .NET, un coste esperado por la naturaleza dinámica de los objetos en V8. |
 | **Bun** | **~2.0 GB** | **El más intensivo en RAM**. Aunque es el más rápido en CPU, es el que más memoria consume. Esto podría deberse a una gestión de memoria menos madura o a un memory leak, ya que aún es un runtime joven y no es la primera vez que me he encontrado con un leak corriendo otros proyectos de nodejs con bun. |
 
@@ -91,15 +86,16 @@ La velocidad no es el único factor. El consumo de memoria revela una historia d
 
 ## Conclusiones Finales
 
-1.  **Bun se Consolida como el Rey de la Velocidad (en CPU):** En este escenario de procesamiento masivo, **Bun es el campeón indiscutible en tiempo de ejecución**. Su liderazgo no solo se mantiene, sino que se afianza a mayor escala, superando a Node.js por un margen de 2 a 1.
+1.  **Bun se Consolida como el Rey de la Velocidad (en CPU):** En este escenario de procesamiento masivo, **Bun es el campeón indiscutible en tiempo de ejecución**. Su liderazgo sobre Node.js es abrumador, demostrando el poder del motor JavaScriptCore para este tipo de tarea.
 
-2.  **El Rendimiento No es Solo Velocidad: .NET Lidera en Eficiencia:** Si bien Bun gana en velocidad, **.NET es el claro ganador en eficiencia de memoria**, consumiendo casi 4 veces menos RAM. Esto lo convierte en una opción increíblemente atractiva para entornos de producción donde la memoria es un recurso crítico, ofreciendo un equilibrio casi perfecto entre alta velocidad y baja huella de recursos.
+2.  **El Rendimiento No es Solo Velocidad: .NET y Java Lideran en Eficiencia:** Si bien Bun gana en velocidad, **.NET es el claro ganador en eficiencia de memoria**, consumiendo casi 4 veces menos RAM. **Java se posiciona como una opción intermedia excelente**, ofreciendo un rendimiento en CPU ligeramente superior a .NET con un consumo de memoria muy controlado. Ambos (.NET y Java) son opciones increíblemente atractivas para entornos de producción donde el equilibrio entre velocidad y recursos es crítico.
 
 3.  **Node.js Muestra sus Límites en Cargas CPU-Intensivas:** Aunque es el runtime más popular, para este tipo de tarea computacional la brecha de rendimiento con sus competidores se hace más grande a medida que aumenta la carga.
 
 4.  **La Elección Depende del Contexto:**
     *   Para tareas de procesamiento en frío donde la **velocidad máxima de CPU es la única prioridad** y la memoria es abundante, **Bun** es la mejor opción.
-    *   Para sistemas de producción robustos que requieren un **excelente equilibrio entre velocidad, bajo consumo de memoria y madurez del ecosistema**, **.NET (Release)** es la opción superior.
+    *   Para sistemas de producción que exigen la **máxima eficiencia de memoria**, **.NET (Release)** es el ganador indiscutible.
+    *   Para un **excelente equilibrio entre velocidad de élite, eficiencia de memoria y un ecosistema maduro y robusto**, **Java** es una opción formidable.
     *   **Node.js** sigue siendo una herramienta fantástica para aplicaciones I/O-bound (servidores web, APIs), pero para este caso de uso específico, es superado.
 
 ### Un Benchmark para un Caso de Uso Específico
@@ -107,5 +103,5 @@ Es crucial recordar que diseñé "Mastica-Historial" para mi caso de uso especí
 
 Para evaluaciones de rendimiento en otros ámbitos, recomiendo consultar benchmarks especializados:
 
-*   **[TechEmpower Web Framework Benchmarks](https://www.techempower.com/benchmarks/#section=data-r23y):** El estándar de la industria para comparar frameworks web.
+*   **[TechEmpower Web Framework Benchmarks](https://www.techempower.com/benchmarks/):** El estándar de la industria para comparar frameworks web.
 *   **[SharkBench](https://sharkbench.dev/):** Otro gran recurso que compara el rendimiento de diferentes runtimes de JavaScript.
