@@ -61,7 +61,7 @@ Los resultados de esta prueba base muestran un claro ganador en rendimiento y of
 | **Bun** | **~9.8 s** | 🥇 **El claro ganador**. El motor JavaScriptCore de Bun demuestra una eficiencia extraordinaria en la creación y acceso a propiedades de millones de objetos pesados. |
 | **.NET (Release)** | **~13.1 s** | 🥈 **Rendimiento de élite**. La versión optimizada de .NET es extremadamente rápida, demostrando el poder de su compilador JIT (RyuJIT). |
 | **Node.js** | **~18.7 s** | 🐢 **Tercer lugar**. Completa la tarea, pero es casi 2 veces más lento que Bun. La sobrecarga del motor V8 en este tipo de manipulación de objetos dinámicos es evidente. |
-| **.NET (Debug)** | **~18.9 s** | 🐢 **El más lento**. Sin las optimizaciones del JIT, el rendimiento se degrada significativamente, quedando a la par con Node.js. |
+| **.NET (Debug)** | **~18.9 s** | Sin las optimizaciones del JIT, el rendimiento se degrada significativamente, quedando a la par con Node.js. |
 
 ---
 
