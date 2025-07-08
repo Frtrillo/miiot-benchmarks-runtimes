@@ -63,10 +63,10 @@ Para llevar los runtimes al límite, se ejecutó la prueba con 50 millones de re
 
 | Runtime         | Tiempo (segundos) | Observaciones                                                                                                                        |
 | :-------------- | :---------------- | :----------------------------------------------------------------------------------------------------------------------------------- |
-| **Bun**         | **~23.56 s**       | 🥇 **El rey de la velocidad en JavaScript**. Demuestra una eficiencia extraordinaria en la creación y acceso a propiedades de millones de objetos, consolidando su liderazgo sobre Node.js. |
-| **Java**        | **~26.1 s**       | 🥈 **Rendimiento sobresaliente**. Ahora es el más rápido del grupo, superando incluso a Bun y .NET. La JVM HotSpot demuestra su poder de optimización en tiempo de ejecución para cargas masivas. |
-| **.NET (Release)** | **~40.4 s**    | 🥉 **Rendimiento sólido y predecible**. Extremadamente competitivo y con una escalabilidad robusta. Un pilar de fiabilidad para sistemas de producción. |
-| **Node.js**     | **~64.6 s**       | **La brecha se amplía**. A esta escala, Node.js es **2 veces más lento que Bun** y significativamente más lento que .NET y Java. La sobrecarga en la gestión de objetos dinámicos de V8 se hace muy pronunciada. |
+| **Bun**         | **23.564 s**       | 🥇 **El rey de la velocidad en JavaScript**. Demuestra una eficiencia extraordinaria en la creación y acceso a propiedades de millones de objetos, consolidando su liderazgo sobre Node.js. |
+| **Java**        | **26.076 s**       | 🥈 **Rendimiento sobresaliente**. La JVM HotSpot demuestra su poder de optimización en tiempo de ejecución para cargas masivas. |
+| **.NET (Release)** | **40.492 s**    | 🥉 **Rendimiento sólido y predecible**. Extremadamente competitivo y con una escalabilidad robusta. Un pilar de fiabilidad para sistemas de producción. |
+| **Node.js**     | **78.345 s**       | **La brecha se amplía**. A esta escala, Node.js es **3.3 veces más lento que Bun** y significativamente más lento que .NET y Java. La sobrecarga en la gestión de objetos dinámicos de V8 se hace muy pronunciada. |
 
 ### Resultados en ARM (Apple Silicon M1)
 
