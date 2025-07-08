@@ -25,17 +25,15 @@ Para asegurar una comparación justa y precisa, he seguido principios estrictos:
 *   **Modos de Ejecución Claros:** Se prueba .NET tanto en modo **Release** (con todas las optimizaciones del compilador) como en modo **Debug** (sin optimizaciones) para ilustrar el impacto de la compilación. Java se ejecuta directamente sobre su código compilado (`.class`), que por defecto está altamente optimizado por su JIT (HotSpot).
 
 ### Entorno de Pruebas
-*   **CPU:** AMD Ryzen 7 5800X (8 núcleos, 16 hilos)
-*   **RAM:** 16 GB DDR4 3600 MHz
-*   **Sistema Operativo:** Windows 11
+*   **CPU x86:** AMD Ryzen 7 5800X (8 núcleos, 16 hilos)
+*   **CPU ARM:** Apple Silicon M1 (8 núcleos, 8 hilos de rendimiento + 2 hilos de eficiencia)
+*   **RAM:** 16 GB DDR4 3600 MHz (x86) / 16 GB LPDDR4X (ARM)
+*   **Sistema Operativo:** Windows 11 (x86) / macOS (ARM)
 
 ## Cómo Ejecutar el Benchmark
 ```powershell
 # .NET (Modo Release - Optimizado para producción)
 dotnet run -c Release --project ./dotnet-mastica-historial/dotnet-mastica-historial.csproj
-
-# .NET (Modo Debug - Sin optimizar, para desarrollo)
-dotnet run --project ./dotnet-mastica-historial/dotnet-mastica-historial.csproj
 
 # Java (Compilar primero)
 javac ./java-mastica-historial/Benchmark.java
@@ -62,6 +60,8 @@ node ./bun-mastica-historial/benchmark.js
 
 Para llevar los runtimes al límite, se ejecutó la prueba con 50 millones de registros. Los resultados no solo confirman las tendencias, sino que también posicionan a los lenguajes compilados estáticamente de forma muy favorable.
 
+### Resultados en x86 (AMD Ryzen 7 5800X)
+
 | Runtime | Tiempo (segundos) | Observaciones |
 | :--- | :--- | :--- |
 | **Bun** | **~32.6 s** | 🥇 **El rey de la velocidad en JavaScript**. Demuestra una eficiencia extraordinaria en la creación y acceso a propiedades de millones de objetos, consolidando su liderazgo sobre Node.js. |
@@ -69,11 +69,31 @@ Para llevar los runtimes al límite, se ejecutó la prueba con 50 millones de re
 | **.NET (Release)** | **~43.4 s** | 🥉 **Rendimiento sólido y predecible**. Extremadamente competitivo y con una escalabilidad robusta. Un pilar de fiabilidad para sistemas de producción. |
 | **Node.js** | **~64.6 s** | **La brecha se amplía**. A esta escala, Node.js es **2 veces más lento que Bun** y significativamente más lento que .NET y Java. La sobrecarga en la gestión de objetos dinámicos de V8 se hace muy pronunciada. |
 
+### Resultados en ARM (Apple Silicon M1)
+
+| Runtime | Tiempo (segundos) | Observaciones |
+| :--- | :--- | :--- |
+| **Bun** | **~28.2 s** | 🥇 **Excelente rendimiento en ARM**. Bun demuestra una optimización excepcional para Apple Silicon, siendo incluso más rápido que en x86. El motor JavaScriptCore está muy bien optimizado para la arquitectura ARM. |
+| **.NET (Release)** | **~31.9 s** | 🥈 **Rendimiento excepcional en ARM**. .NET muestra una optimización extraordinaria para Apple Silicon, siendo significativamente más rápido que en x86 (~27% mejor). La compilación nativa para ARM está aprovechando completamente las optimizaciones de la arquitectura. |
+| **Node.js** | **~70.0 s** | **Rendimiento similar a x86**. Node.js mantiene una brecha significativa con Bun, siendo aproximadamente 2.5 veces más lento. El motor V8 parece no aprovechar completamente las optimizaciones específicas de ARM. |
+| **Java** | **~109.2 s** | **Rendimiento inesperadamente lento en ARM**. OpenJDK 21 muestra un rendimiento significativamente peor en Apple Silicon (~2.7x más lento que en x86). Esto sugiere posibles problemas de optimización específicos de ARM en la JVM HotSpot. |
+
+### Comparación Arquitectónica
+
+**Observaciones clave entre x86 y ARM:**
+
+*   **Bun en ARM es más rápido:** La diferencia de ~4.4 segundos (28.2s vs 32.6s) sugiere que Bun está muy bien optimizado para Apple Silicon o ARM.
+*   **.NET en ARM es excepcional:** Muestra una mejora del ~27% respecto a x86, aprovechando completamente las optimizaciones de ARM.
+*   **Node.js mantiene la brecha:** La diferencia de rendimiento entre Bun y Node.js se mantiene consistente entre arquitecturas.
+*   **Java en ARM es sorprendentemente lento:** OpenJDK 21 muestra un rendimiento ~2.7x peor en ARM que en x86, lo que sugiere problemas de optimización específicos de la arquitectura.
+
 ![Resultados del Benchmark](benchmark-result.png)
 
 ### Análisis del Consumo de Memoria (Test de 50M)
 
 La velocidad no es el único factor. El consumo de memoria revela una historia diferente y muy importante, destacando la eficiencia de los runtimes con tipado estático.
+
+#### Consumo de Memoria en x86 (AMD Ryzen 7 5800X)
 
 | Runtime | Consumo de RAM (Aprox.) | Observaciones |
 | :--- | :--- | :--- |
@@ -82,21 +102,40 @@ La velocidad no es el único factor. El consumo de memoria revela una historia d
 | **Node.js** | **~1.2 GB** | **Consumo moderado**. Utiliza más del doble de RAM que .NET, un coste esperado por la naturaleza dinámica de los objetos en V8. |
 | **Bun** | **~2.0 GB** | **El más intensivo en RAM**. Aunque es el más rápido en CPU, es el que más memoria consume. Esto podría deberse a una gestión de memoria menos madura o a un memory leak, ya que aún es un runtime joven y no es la primera vez que me he encontrado con un leak corriendo otros proyectos de nodejs con bun. |
 
+#### Consumo de Memoria en ARM (Apple Silicon M1)
+
+| Runtime | Consumo de RAM (Aprox.) | Observaciones |
+| :--- | :--- | :--- |
+| **Bun** | **~1.8 GB** | **Ligeramente mejor que en x86**. Bun muestra una gestión de memoria más eficiente en ARM, posiblemente debido a optimizaciones específicas de la arquitectura. |
+| **.NET (Release)** | **~480 MB** | 🏆 **Excelente eficiencia en ARM**. .NET muestra una gestión de memoria aún más eficiente en Apple Silicon, consumiendo menos RAM que en x86. |
+| **Node.js** | **~1.1 GB** | **Mejor rendimiento en ARM**. Node.js consume menos memoria en Apple Silicon, sugiriendo que V8 tiene optimizaciones de memoria específicas para ARM. |
+| **Java** | **En progreso** | **Pendiente de medición**. La JVM debería mostrar un consumo de memoria eficiente en ARM. |
+
 ---
 
 ## Conclusiones Finales
 
-1.  **Bun se Consolida como el Rey de la Velocidad (en CPU):** En este escenario de procesamiento masivo, **Bun es el campeón indiscutible en tiempo de ejecución**. Su liderazgo sobre Node.js es abrumador, demostrando el poder del motor JavaScriptCore para este tipo de tarea.
+### Rendimiento por Arquitectura
 
-2.  **El Rendimiento No es Solo Velocidad: .NET y Java Lideran en Eficiencia:** Si bien Bun gana en velocidad, **.NET es el claro ganador en eficiencia de memoria**, consumiendo casi 4 veces menos RAM. **Java se posiciona como una opción intermedia excelente**, ofreciendo un rendimiento en CPU ligeramente superior a .NET con un consumo de memoria muy controlado. Ambos (.NET y Java) son opciones increíblemente atractivas para entornos de producción donde el equilibrio entre velocidad y recursos es crítico.
+1.  **Bun se Consolida como el Rey de la Velocidad (en CPU):** En este escenario de procesamiento masivo, **Bun es el campeón indiscutible en tiempo de ejecución** en ambas arquitecturas. Su liderazgo sobre Node.js es abrumador, demostrando el poder del motor JavaScriptCore para este tipo de tarea. **Notablemente, Bun es aún más rápido en ARM (Apple Silicon M1) que en x86**, mostrando una optimización excepcional para la arquitectura ARM.
 
-3.  **Node.js Muestra sus Límites en Cargas CPU-Intensivas:** Aunque es el runtime más popular, para este tipo de tarea computacional la brecha de rendimiento con sus competidores se hace más grande a medida que aumenta la carga.
+2.  **El Rendimiento No es Solo Velocidad: .NET y Java Lideran en Eficiencia:** Si bien Bun gana en velocidad, **.NET es el claro ganador en eficiencia de memoria** en x86, consumiendo casi 4 veces menos RAM. **Java se posiciona como una opción intermedia excelente**, ofreciendo un rendimiento en CPU ligeramente superior a .NET con un consumo de memoria muy controlado. Ambos (.NET y Java) son opciones increíblemente atractivas para entornos de producción donde el equilibrio entre velocidad y recursos es crítico.
 
-4.  **La Elección Depende del Contexto:**
-    *   Para tareas de procesamiento en frío donde la **velocidad máxima de CPU es la única prioridad** y la memoria es abundante, **Bun** es la mejor opción.
-    *   Para sistemas de producción que exigen la **máxima eficiencia de memoria**, **.NET (Release)** es el ganador indiscutible.
-    *   Para un **excelente equilibrio entre velocidad de élite, eficiencia de memoria y un ecosistema maduro y robusto**, **Java** es una opción formidable.
-    *   **Node.js** sigue siendo una herramienta fantástica para aplicaciones I/O-bound (servidores web, APIs), pero para este caso de uso específico, es superado.
+3.  **Node.js Muestra sus Límites en Cargas CPU-Intensivas:** Aunque es el runtime más popular, para este tipo de tarea computacional la brecha de rendimiento con sus competidores se hace más grande a medida que aumenta la carga. **En ARM, Node.js mantiene una brecha similar con Bun**, siendo aproximadamente 2.5 veces más lento.
+
+4.  **Optimizaciones Específicas de Arquitectura:**
+    *   **Bun en ARM:** Muestra una optimización excepcional para Apple Silicon, siendo ~13% más rápido que en x86.
+    *   **.NET en ARM:** Demuestra una optimización extraordinaria, siendo ~27% más rápido que en x86 y con mejor eficiencia de memoria.
+    *   **Node.js en ARM:** Mantiene un rendimiento similar a x86, pero con mejor gestión de memoria.
+    *   **Java en ARM:** Rendimiento inesperadamente lento (~2.7x más lento que en x86).
+
+### Recomendaciones por Contexto
+
+**La Elección Depende del Contexto:**
+*   Para tareas de procesamiento en frío donde la **velocidad máxima de CPU es la única prioridad** y la memoria es abundante, **Bun** es la mejor opción, especialmente en ARM.
+*   Para sistemas de producción que exigen la **máxima eficiencia de memoria**, **.NET (Release)** es el ganador indiscutible en x86.
+*   Para un **excelente equilibrio entre velocidad de élite, eficiencia de memoria y un ecosistema maduro y robusto**, **Java** es una opción formidable.
+*   **Node.js** sigue siendo una herramienta fantástica para aplicaciones I/O-bound (servidores web, APIs), pero para este caso de uso específico, es superado en ambas arquitecturas.
 
 ### Un Benchmark para un Caso de Uso Específico
 Es crucial recordar que diseñé "Mastica-Historial" para mi caso de uso específico: el procesamiento intensivo de datos históricos de dispositivos. Los resultados son válidos para tareas similares, pero no deben extrapolarse a todos los escenarios (p. ej., servidores web).
