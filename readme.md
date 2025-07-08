@@ -1,4 +1,3 @@
-
 # Benchmark de Rendimiento: .NET vs. Java vs. Bun vs. Node.js by Francisco Trillo 🔥
 
 En este documento presento los resultados de un benchmark riguroso que diseñé para medir el rendimiento de **.NET (C#), Java, Bun y Node.js** en una tarea que simula mi caso de uso real: el procesamiento masivo de **objetos de datos complejos** de forma intensiva y puramente computacional (CPU-bound).
@@ -62,12 +61,12 @@ Para llevar los runtimes al límite, se ejecutó la prueba con 50 millones de re
 
 ### Resultados en x86 (AMD Ryzen 7 5800X)
 
-| Runtime | Tiempo (segundos) | Observaciones |
-| :--- | :--- | :--- |
-| **Bun** | **~32.6 s** | 🥇 **El rey de la velocidad en JavaScript**. Demuestra una eficiencia extraordinaria en la creación y acceso a propiedades de millones de objetos, consolidando su liderazgo sobre Node.js. |
-| **Java** | **~40.5 s** | 🥈 **Rendimiento de primer nivel**. Ligeramente más rápido que .NET, la JVM HotSpot demuestra su madurez y poder de optimización en tiempo de ejecución para este tipo de cargas de trabajo. |
-| **.NET (Release)** | **~43.4 s** | 🥉 **Rendimiento sólido y predecible**. Extremadamente competitivo y con una escalabilidad robusta. Un pilar de fiabilidad para sistemas de producción. |
-| **Node.js** | **~64.6 s** | **La brecha se amplía**. A esta escala, Node.js es **2 veces más lento que Bun** y significativamente más lento que .NET y Java. La sobrecarga en la gestión de objetos dinámicos de V8 se hace muy pronunciada. |
+| Runtime         | Tiempo (segundos) | Observaciones                                                                                                                        |
+| :-------------- | :---------------- | :----------------------------------------------------------------------------------------------------------------------------------- |
+| **Bun**         | **~23.56 s**       | 🥇 **El rey de la velocidad en JavaScript**. Demuestra una eficiencia extraordinaria en la creación y acceso a propiedades de millones de objetos, consolidando su liderazgo sobre Node.js. |
+| **Java**        | **~26.1 s**       | 🥈 **Rendimiento sobresaliente**. Ahora es el más rápido del grupo, superando incluso a Bun y .NET. La JVM HotSpot demuestra su poder de optimización en tiempo de ejecución para cargas masivas. |
+| **.NET (Release)** | **~40.4 s**    | 🥉 **Rendimiento sólido y predecible**. Extremadamente competitivo y con una escalabilidad robusta. Un pilar de fiabilidad para sistemas de producción. |
+| **Node.js**     | **~64.6 s**       | **La brecha se amplía**. A esta escala, Node.js es **2 veces más lento que Bun** y significativamente más lento que .NET y Java. La sobrecarga en la gestión de objetos dinámicos de V8 se hace muy pronunciada. |
 
 ### Resultados en ARM (Apple Silicon M1)
 

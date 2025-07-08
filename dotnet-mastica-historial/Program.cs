@@ -7,6 +7,7 @@ using System.Linq;
 /// <summary>
 /// Representa la estructura de datos completa de un registro de log,
 /// coincidiendo con todo el esquema de la tabla de la base de datos.
+/// (Class definition is unchanged)
 /// </summary>
 public class HistoryLogFull
 {
@@ -86,6 +87,7 @@ public class HistoryLogFull
 
 /// <summary>
 /// Clase mutable para agregar los valores de forma eficiente.
+/// (Class definition is unchanged)
 /// </summary>
 public class BucketAggregate
 {
@@ -106,13 +108,21 @@ class Program
         int n = 50000000;
         var interval = TimeSpan.FromMinutes(10);
 
-        Console.WriteLine($"Procesando {n:N0} registros con ESQUEMA COMPLETO...");
+        Console.WriteLine($"Procesando {n:N0} registros con ESQUEMA COMPLETO (Fair Fight)...");
+
+        // Warm-up to ensure JIT compilation is complete before timing
+        Console.WriteLine("Warming up the JIT...");
+        ProcessComplexLogsOnTheFly(10_000_000, interval);
+        Console.WriteLine("Warm-up complete. Starting benchmark.");
+        
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
 
         var sw = Stopwatch.StartNew();
         var results = ProcessComplexLogsOnTheFly(n, interval);
         sw.Stop();
 
-        Console.WriteLine($"C# .NET (Optimizado) - Tiempo: {sw.Elapsed.TotalSeconds:F3} s");
+        Console.WriteLine($"C# .NET (Fair Fight) - Tiempo: {sw.Elapsed.TotalSeconds:F3} s");
         Console.WriteLine($"Buckets calculados: {results.Count}");
     }
 
@@ -122,10 +132,15 @@ class Program
         var start = DateTime.Now.AddDays(-7);
         var rnd = new Random();
 
+        // *** MODIFICATION #1: Create the log object ONCE, before the loop. ***
+        var log = new HistoryLogFull();
+
         for (int i = 0; i < n; i++)
         {
             var timestamp = start.AddMinutes(i);
-            var log = GenerateFullHistoryLog(rnd, timestamp);
+
+            // *** MODIFICATION #2: Populate the existing object instead of creating a new one. ***
+            PopulateFullHistoryLog(log, rnd, timestamp);
 
             var bucket = (long)(timestamp.Ticks / interval.Ticks) * interval.Ticks;
 
@@ -138,7 +153,7 @@ class Program
             ProcessLog(aggregate, log);
         }
 
-        // El cálculo final
+        // The final projection remains the same
         return grouped.Values.Select(g => new
         {
             AvgTemperature = g.CountTemperature > 0 ? g.SumTemperature / g.CountTemperature : 0,
@@ -150,109 +165,93 @@ class Program
     
     /// <summary>
     /// Agrega un único log al bucket correspondiente.
+    /// (Method is unchanged)
     /// </summary>
     static void ProcessLog(BucketAggregate aggregate, HistoryLogFull log)
     {
-        if (log.Temperature.HasValue)
-        {
-            aggregate.SumTemperature += log.Temperature.Value;
-            aggregate.CountTemperature++;
-        }
-        if (log.ActivePower.HasValue)
-        {
-            aggregate.SumActivePower += log.ActivePower.Value;
-            aggregate.CountActivePower++;
-        }
-        if (log.CompressorHz.HasValue)
-        {
-            aggregate.SumCompressorHz += log.CompressorHz.Value;
-            aggregate.CountCompressorHz++;
-        }
-        if (log.AlarmActive.HasValue && log.AlarmActive.Value > 0)
-        {
-            aggregate.AlarmCount++;
-        }
+        if (log.Temperature.HasValue) { aggregate.SumTemperature += log.Temperature.Value; aggregate.CountTemperature++; }
+        if (log.ActivePower.HasValue) { aggregate.SumActivePower += log.ActivePower.Value; aggregate.CountActivePower++; }
+        if (log.CompressorHz.HasValue) { aggregate.SumCompressorHz += log.CompressorHz.Value; aggregate.CountCompressorHz++; }
+        if (log.AlarmActive.HasValue && log.AlarmActive.Value > 0) { aggregate.AlarmCount++; }
         aggregate.TotalCount++;
     }
 
     /// <summary>
-    /// Generador para el objeto completo y pesado. Usa un enfoque directo para máximo rendimiento.
+    /// *** MODIFICATION #3: This method now populates an existing object instead of creating a new one. ***
+    /// It's renamed to 'Populate...' and has a `void` return type.
     /// </summary>
-    private static HistoryLogFull GenerateFullHistoryLog(Random rnd, DateTime timestamp)
+    private static void PopulateFullHistoryLog(HistoryLogFull log, Random rnd, DateTime timestamp)
     {
-        return new HistoryLogFull
-        {
-            CreatedAt = timestamp,
-            Premium = rnd.NextDouble() > 0.1 ? (short)rnd.Next(2) : null,
-            Temperature = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 40) : null,
-            Temperature2 = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 40) : null,
-            Temperature3 = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 40) : null,
-            Humidity = rnd.NextDouble() > 0.1 ? (short)rnd.Next(100) : null,
-            PowerOn = rnd.NextDouble() > 0.1 ? rnd.Next(2) == 0 : null,
-            Fan = rnd.NextDouble() > 0.1 ? rnd.Next(2) == 0 : null,
-            Pump = rnd.NextDouble() > 0.1 ? rnd.Next(2) == 0 : null,
-            Speco = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 10) : null,
-            Spdhw = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 60) : null,
-            Defrost = rnd.NextDouble() > 0.1 ? (short)rnd.Next(5) : null,
-            Spantilegionella = rnd.NextDouble() > 0.1 ? (short)rnd.Next(70) : null,
-            ExpansionValveOut = rnd.NextDouble() > 0.1 ? rnd.Next(2) == 0 : null,
-            ModbusGlobalFails = rnd.NextDouble() > 0.1 ? rnd.Next(10) : null,
-            RefrigerantLiquid = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 5) : null,
-            AlarmDischargeTemp = rnd.NextDouble() > 0.1 ? (short)rnd.Next(2) : null,
-            AlarmDriverInverter = rnd.NextDouble() > 0.1 ? (short)rnd.Next(2) : null,
-            CompressorPercentage = rnd.NextDouble() > 0.1 ? (short)rnd.Next(100) : null,
-            DischargeTemperature = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 120) : null,
-            AntilegionellaDayWeek = rnd.NextDouble() > 0.1 ? (short)rnd.Next(7) : null,
-            PumpFlow = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 1000) : null,
-            Pr1 = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 30) : null,
-            Pr2 = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 30) : null,
-            Pr3 = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 30) : null,
-            Compressor = rnd.NextDouble() > 0.1 ? rnd.Next(2) == 0 : null,
-            CompressorHz = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 90) : null,
-            AuxGroupWatts = rnd.NextDouble() > 0.1 ? (short)rnd.Next(6000) : null,
-            AutoMode = rnd.NextDouble() > 0.1 ? (short)rnd.Next(3) : null,
-            HeatFocus = rnd.NextDouble() > 0.1 ? (short)rnd.Next(2) : null,
-            TempHeating = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 50) : null,
-            ReturnTemp = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 45) : null,
-            OpModeHeating = rnd.NextDouble() > 0.1 ? (short)rnd.Next(4) : null,
-            EvaporatorTemp = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 10) : null,
-            EvaporationTemp = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 5) : null,
-            AirInlet = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 25) : null,
-            AirOutlet = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 15) : null,
-            SetPointAir = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 22) : null,
-            OutsideTemp = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 45) : null,
-            AlarmActive = rnd.NextDouble() > 0.1 ? (short)(rnd.NextDouble() < 0.02 ? rnd.Next(10) : 0) : null,
-            ActivePower = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 3500) : null,
-            TotalActivePower = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 100000) : null,
-            T1Temp = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 50) : null,
-            T2Temp = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 40) : null,
-            ThermalDiff = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 10) : null,
-            ThermalPower = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 5000) : null,
-            TotalThermalEnergy = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 200000) : null,
-            LitersPerHourFlow = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 1500) : null,
-            CopInstant = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 6) : null,
-            PumpPercent = rnd.NextDouble() > 0.1 ? (short)rnd.Next(100) : null,
-            Resistors = rnd.NextDouble() > 0.1 ? rnd.Next(2) == 0 : null,
-            SpHeating = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 55) : null,
-            SpMode = rnd.NextDouble() > 0.1 ? (short)rnd.Next(3) : null,
-            DhwSpMode = rnd.NextDouble() > 0.1 ? (short)rnd.Next(3) : null,
-            AutoMinSpDhw = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 45) : null,
-            AlarmPumpFlow = rnd.NextDouble() > 0.1 ? (short)rnd.Next(2) : null,
-            AlarmAdcBoard = rnd.NextDouble() > 0.1 ? (short)rnd.Next(2) : null,
-            AlarmLp = rnd.NextDouble() > 0.1 ? (short)rnd.Next(2) : null,
-            AlarmHp = rnd.NextDouble() > 0.1 ? (short)rnd.Next(2) : null,
-            Sp1 = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 50) : null,
-            PowerOnHeating = rnd.NextDouble() > 0.1 ? (short)rnd.Next(2) : null,
-            Antilegionella = rnd.NextDouble() > 0.1 ? rnd.Next(2) == 0 : null,
-            Z1Sp = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 25) : null,
-            Z2Sp = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 25) : null,
-            PowerOnDhw = rnd.NextDouble() > 0.1 ? (short)rnd.Next(2) : null,
-            CoolingHeatingMode = rnd.NextDouble() > 0.1 ? (short)rnd.Next(3) : null,
-            ValveZ1 = rnd.NextDouble() > 0.1 ? rnd.Next(2) == 0 : null,
-            ValveZ2 = rnd.NextDouble() > 0.1 ? rnd.Next(2) == 0 : null,
-            TotalizerWh = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 300000) : null,
-            GasSuction = rnd.NextDouble() > 0.1 ? (short)rnd.Next(10) : null,
-            RunningFanPercent = rnd.NextDouble() > 0.1 ? (short)rnd.Next(100) : null
-        };
+        log.CreatedAt = timestamp;
+        log.Premium = rnd.NextDouble() > 0.1 ? (short)rnd.Next(2) : null;
+        log.Temperature = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 40) : null;
+        log.Temperature2 = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 40) : null;
+        log.Temperature3 = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 40) : null;
+        log.Humidity = rnd.NextDouble() > 0.1 ? (short)rnd.Next(100) : null;
+        log.PowerOn = rnd.NextDouble() > 0.1 ? rnd.Next(2) == 0 : null;
+        log.Fan = rnd.NextDouble() > 0.1 ? rnd.Next(2) == 0 : null;
+        log.Pump = rnd.NextDouble() > 0.1 ? rnd.Next(2) == 0 : null;
+        log.Speco = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 10) : null;
+        log.Spdhw = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 60) : null;
+        log.Defrost = rnd.NextDouble() > 0.1 ? (short)rnd.Next(5) : null;
+        log.Spantilegionella = rnd.NextDouble() > 0.1 ? (short)rnd.Next(70) : null;
+        log.ExpansionValveOut = rnd.NextDouble() > 0.1 ? rnd.Next(2) == 0 : null;
+        log.ModbusGlobalFails = rnd.NextDouble() > 0.1 ? rnd.Next(10) : null;
+        log.RefrigerantLiquid = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 5) : null;
+        log.AlarmDischargeTemp = rnd.NextDouble() > 0.1 ? (short)rnd.Next(2) : null;
+        log.AlarmDriverInverter = rnd.NextDouble() > 0.1 ? (short)rnd.Next(2) : null;
+        log.CompressorPercentage = rnd.NextDouble() > 0.1 ? (short)rnd.Next(100) : null;
+        log.DischargeTemperature = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 120) : null;
+        log.AntilegionellaDayWeek = rnd.NextDouble() > 0.1 ? (short)rnd.Next(7) : null;
+        log.PumpFlow = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 1000) : null;
+        log.Pr1 = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 30) : null;
+        log.Pr2 = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 30) : null;
+        log.Pr3 = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 30) : null;
+        log.Compressor = rnd.NextDouble() > 0.1 ? rnd.Next(2) == 0 : null;
+        log.CompressorHz = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 90) : null;
+        log.AuxGroupWatts = rnd.NextDouble() > 0.1 ? (short)rnd.Next(6000) : null;
+        log.AutoMode = rnd.NextDouble() > 0.1 ? (short)rnd.Next(3) : null;
+        log.HeatFocus = rnd.NextDouble() > 0.1 ? (short)rnd.Next(2) : null;
+        log.TempHeating = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 50) : null;
+        log.ReturnTemp = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 45) : null;
+        log.OpModeHeating = rnd.NextDouble() > 0.1 ? (short)rnd.Next(4) : null;
+        log.EvaporatorTemp = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 10) : null;
+        log.EvaporationTemp = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 5) : null;
+        log.AirInlet = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 25) : null;
+        log.AirOutlet = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 15) : null;
+        log.SetPointAir = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 22) : null;
+        log.OutsideTemp = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 45) : null;
+        log.AlarmActive = rnd.NextDouble() > 0.1 ? (short)(rnd.NextDouble() < 0.02 ? rnd.Next(10) : 0) : null;
+        log.ActivePower = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 3500) : null;
+        log.TotalActivePower = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 100000) : null;
+        log.T1Temp = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 50) : null;
+        log.T2Temp = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 40) : null;
+        log.ThermalDiff = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 10) : null;
+        log.ThermalPower = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 5000) : null;
+        log.TotalThermalEnergy = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 200000) : null;
+        log.LitersPerHourFlow = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 1500) : null;
+        log.CopInstant = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 6) : null;
+        log.PumpPercent = rnd.NextDouble() > 0.1 ? (short)rnd.Next(100) : null;
+        log.Resistors = rnd.NextDouble() > 0.1 ? rnd.Next(2) == 0 : null;
+        log.SpHeating = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 55) : null;
+        log.SpMode = rnd.NextDouble() > 0.1 ? (short)rnd.Next(3) : null;
+        log.DhwSpMode = rnd.NextDouble() > 0.1 ? (short)rnd.Next(3) : null;
+        log.AutoMinSpDhw = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 45) : null;
+        log.AlarmPumpFlow = rnd.NextDouble() > 0.1 ? (short)rnd.Next(2) : null;
+        log.AlarmAdcBoard = rnd.NextDouble() > 0.1 ? (short)rnd.Next(2) : null;
+        log.AlarmLp = rnd.NextDouble() > 0.1 ? (short)rnd.Next(2) : null;
+        log.AlarmHp = rnd.NextDouble() > 0.1 ? (short)rnd.Next(2) : null;
+        log.Sp1 = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 50) : null;
+        log.PowerOnHeating = rnd.NextDouble() > 0.1 ? (short)rnd.Next(2) : null;
+        log.Antilegionella = rnd.NextDouble() > 0.1 ? rnd.Next(2) == 0 : null;
+        log.Z1Sp = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 25) : null;
+        log.Z2Sp = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 25) : null;
+        log.PowerOnDhw = rnd.NextDouble() > 0.1 ? (short)rnd.Next(2) : null;
+        log.CoolingHeatingMode = rnd.NextDouble() > 0.1 ? (short)rnd.Next(3) : null;
+        log.ValveZ1 = rnd.NextDouble() > 0.1 ? rnd.Next(2) == 0 : null;
+        log.ValveZ2 = rnd.NextDouble() > 0.1 ? rnd.Next(2) == 0 : null;
+        log.TotalizerWh = rnd.NextDouble() > 0.1 ? (float)(rnd.NextDouble() * 300000) : null;
+        log.GasSuction = rnd.NextDouble() > 0.1 ? (short)rnd.Next(10) : null;
+        log.RunningFanPercent = rnd.NextDouble() > 0.1 ? (short)rnd.Next(100) : null;
     }
 }
