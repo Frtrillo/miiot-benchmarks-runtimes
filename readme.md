@@ -85,7 +85,7 @@ Para llevar los runtimes al límite, se ejecutó la prueba con 50 millones de re
 *   **Bun en ARM es más rápido:** La diferencia de ~4.4 segundos (28.2s vs 32.6s) sugiere que Bun está muy bien optimizado para Apple Silicon o ARM.
 *   **.NET en ARM es excepcional:** Muestra una mejora del ~27% respecto a x86, aprovechando completamente las optimizaciones de ARM.
 *   **Node.js mantiene la brecha:** La diferencia de rendimiento entre Bun y Node.js se mantiene consistente entre arquitecturas.
-*   **Java en ARM es sorprendentemente lento:** OpenJDK 21 muestra un rendimiento ~2.7x peor en ARM que en x86, lo que sugiere problemas de optimización específicos de la arquitectura.
+*   **Java en ARM es sorprendentemente lento:** OpenJDK 21 muestra un rendimiento ~2.7x peor en ARM que en x86, lo que sugiere problemas de optimización específicos de la arquitectura o con OpenJDK.
 
 ![Resultados del Benchmark](benchmark-result.png)
 
@@ -101,17 +101,6 @@ La velocidad no es el único factor. El consumo de memoria revela una historia d
 | **Java** | **~1.06 GB** | **Consumo muy eficiente**. Aunque usa más RAM que .NET (debido a que todo es un objeto en el heap), sigue siendo mucho más eficiente que los runtimes de JS. Su recolector de basura (G1 GC) gestiona la carga sin problemas. |
 | **Node.js** | **~1.2 GB** | **Consumo moderado**. Utiliza más del doble de RAM que .NET, un coste esperado por la naturaleza dinámica de los objetos en V8. |
 | **Bun** | **~2.0 GB** | **El más intensivo en RAM**. Aunque es el más rápido en CPU, es el que más memoria consume. Esto podría deberse a una gestión de memoria menos madura o a un memory leak, ya que aún es un runtime joven y no es la primera vez que me he encontrado con un leak corriendo otros proyectos de nodejs con bun. |
-
-#### Consumo de Memoria en ARM (Apple Silicon M1)
-
-| Runtime | Consumo de RAM (Aprox.) | Observaciones |
-| :--- | :--- | :--- |
-| **Bun** | **~1.8 GB** | **Ligeramente mejor que en x86**. Bun muestra una gestión de memoria más eficiente en ARM, posiblemente debido a optimizaciones específicas de la arquitectura. |
-| **.NET (Release)** | **~480 MB** | 🏆 **Excelente eficiencia en ARM**. .NET muestra una gestión de memoria aún más eficiente en Apple Silicon, consumiendo menos RAM que en x86. |
-| **Node.js** | **~1.1 GB** | **Mejor rendimiento en ARM**. Node.js consume menos memoria en Apple Silicon, sugiriendo que V8 tiene optimizaciones de memoria específicas para ARM. |
-| **Java** | **En progreso** | **Pendiente de medición**. La JVM debería mostrar un consumo de memoria eficiente en ARM. |
-
----
 
 ## Conclusiones Finales
 
