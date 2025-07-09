@@ -72,19 +72,19 @@ Para llevar los runtimes al límite, se ejecutó la prueba con 50 millones de re
 
 | Runtime | Tiempo (segundos) | Observaciones |
 | :--- | :--- | :--- |
-| **Bun** | **~28.2 s** | 🥇 **Excelente rendimiento en ARM**. Bun demuestra una optimización excepcional para Apple Silicon, siendo incluso más rápido que en x86. El motor JavaScriptCore está muy bien optimizado para la arquitectura ARM. |
-| **.NET (Release)** | **~31.9 s** | 🥈 **Rendimiento excepcional en ARM**. .NET muestra una optimización extraordinaria para Apple Silicon, siendo significativamente más rápido que en x86 (~27% mejor). La compilación nativa para ARM está aprovechando completamente las optimizaciones de la arquitectura. |
-| **Node.js** | **~70.0 s** | **Rendimiento similar a x86**. Node.js mantiene una brecha significativa con Bun, siendo aproximadamente 2.5 veces más lento. El motor V8 parece no aprovechar completamente las optimizaciones específicas de ARM. |
-| **Java** | **~109.2 s** | **Rendimiento inesperadamente lento en ARM**. OpenJDK 21 muestra un rendimiento significativamente peor en Apple Silicon (~2.7x más lento que en x86). Esto sugiere posibles problemas de optimización específicos de ARM en la JVM HotSpot. |
+| **Bun** | **21.825 s** | 🥇 **Excelente rendimiento en ARM**. Bun demuestra una optimización excepcional para Apple Silicon, siendo significativamente más rápido que en x86 (~7.4% mejor). El motor JavaScriptCore está muy bien optimizado para la arquitectura ARM. |
+| **Java** | **28.765 s** | 🥈 **Rendimiento sólido en ARM**. OpenJDK 21 muestra un rendimiento competitivo en Apple Silicon, siendo ligeramente más lento que en x86 (~10% más lento). La JVM HotSpot funciona bien en ARM, aunque no aprovecha completamente las optimizaciones específicas de la arquitectura. |
+| **.NET (Release)** | **31.281 s** | 🥉 **Rendimiento excepcional en ARM**. .NET muestra una optimización extraordinaria para Apple Silicon, siendo significativamente más rápido que en x86 (~23% mejor). La compilación nativa para ARM está aprovechando completamente las optimizaciones de la arquitectura. |
+| **Node.js** | **N/A** | **No probado en esta ronda**. Los resultados anteriores mostraban que Node.js mantenía una brecha significativa con Bun en ARM. |
 
 ### Comparación Arquitectónica
 
 **Observaciones clave entre x86 y ARM:**
 
-*   **Bun en ARM es más rápido:** La diferencia de ~4.4 segundos (28.2s vs 32.6s) sugiere que Bun está muy bien optimizado para Apple Silicon o ARM.
-*   **.NET en ARM es excepcional:** Muestra una mejora del ~27% respecto a x86, aprovechando completamente las optimizaciones de ARM.
-*   **Node.js mantiene la brecha:** La diferencia de rendimiento entre Bun y Node.js se mantiene consistente entre arquitecturas.
-*   **Java en ARM es sorprendentemente lento:** OpenJDK 21 muestra un rendimiento ~2.7x peor en ARM que en x86, lo que sugiere problemas de optimización específicos de la arquitectura o con OpenJDK.
+*   **Bun en ARM es más rápido:** La diferencia de ~10.8 segundos (21.8s vs 32.6s) confirma que Bun está excepcionalmente bien optimizado para Apple Silicon, siendo ~33% más rápido en ARM que en x86.
+*   **.NET en ARM es excepcional:** Muestra una mejora del ~23% respecto a x86, aprovechando completamente las optimizaciones de ARM.
+*   **Java en ARM es competitivo:** OpenJDK 21 muestra un rendimiento ligeramente inferior (~10% más lento) en ARM que en x86, pero sigue siendo muy competitivo y funcional.
+*   **Node.js no fue probado:** En esta ronda de pruebas no se incluyó Node.js, pero los resultados anteriores mostraban una brecha significativa con Bun en ambas arquitecturas.
 
 ![Resultados del Benchmark](benchmark-result.png)
 
@@ -112,10 +112,10 @@ La velocidad no es el único factor. El consumo de memoria revela una historia d
 3.  **Node.js Muestra sus Límites en Cargas CPU-Intensivas:** Aunque es el runtime más popular, para este tipo de tarea computacional la brecha de rendimiento con sus competidores se hace más grande a medida que aumenta la carga. **En ARM, Node.js mantiene una brecha similar con Bun**, siendo aproximadamente 2.5 veces más lento.
 
 4.  **Optimizaciones Específicas de Arquitectura:**
-    *   **Bun en ARM:** Muestra una optimización excepcional para Apple Silicon, siendo ~13% más rápido que en x86.
-    *   **.NET en ARM:** Demuestra una optimización extraordinaria, siendo ~27% más rápido que en x86 y con mejor eficiencia de memoria.
-    *   **Node.js en ARM:** Mantiene un rendimiento similar a x86, pero con mejor gestión de memoria.
-    *   **Java en ARM:** Rendimiento inesperadamente lento (~2.7x más lento que en x86).
+    *   **Bun en ARM:** Muestra una optimización excepcional para Apple Silicon, siendo ~33% más rápido que en x86.
+    *   **.NET en ARM:** Demuestra una optimización extraordinaria, siendo ~23% más rápido que en x86 y con mejor eficiencia de memoria.
+    *   **Node.js en ARM:** No probado en esta ronda, pero los resultados anteriores mostraban una brecha significativa con Bun.
+    *   **Java en ARM:** Rendimiento competitivo, siendo solo ~10% más lento que en x86, lo que indica una buena optimización para Apple Silicon.
 
 ### Recomendaciones por Contexto
 
